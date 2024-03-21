@@ -144,9 +144,16 @@ fn main() {
 		println!("");
 		println!("You can use the following commands:");
 		println!(" reset - resets the machine to a predefined state");
-		println!(" set 0 - sets the top bit of the stack to 0");
-		println!(" set 1 - sets the top bit of the stack to 1");
-		println!(" set x - sets the top bit of the stack to 0 and 1 simultaneously");
+		println!(" set 0 - accumulator := 0");
+		println!(" set 1 - accumulator := 1");
+		println!(" set x - accumulator := 0 and 1 simultaneously");
+		println!(" dup - accumulator := head");
+		println!(" and - accumulator := accumulator & head");
+		println!(" or - accumulator := accumulator | head");
+		println!(" xor - accumulator := accumulator ^ head");
+		println!(" not - accumulator := ^accumulator");
+		println!(" lrot - rotate the stack to the left");
+		println!(" rrot - rotate the stack to the right");
 		println!("");
 	}
 
