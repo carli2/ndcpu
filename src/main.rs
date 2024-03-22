@@ -82,6 +82,22 @@ static HEADS: &'static [&'static str] = &[
 "111111",
 ];
 
+fn bit_compact_2(a: u64) -> u64 { // compact 64 bits in two-groups to 32 bit (using the lower pairs)
+	let b = ((a & 0b0011001100110011001100110011001100110011001100110011001100110000) >>  2) | (a & 0b0000001100110011001100110011001100110011001100110011001100110011);
+	let c = ((b & 0b0000111100001111000011110000111100001111000011110000111100000000) >>  4) | (b & 0b0000000000001111000011110000111100001111000011110000111100001111);
+	let d = ((c & 0b0000000011111111000000001111111100000000111111110000000000000000) >>  8) | (c & 0b0000000000000000000000001111111100000000111111110000000011111111);
+	let e = ((d & 0b0000000000000000111111111111111100000000000000000000000000000000) >> 16) | (d & 0b0000000000000000000000000000000000000000000000001111111111111111);
+	return e
+}
+fn bit_spread_2(a: u64) -> u64 { // spread 32 bits in two-groups
+	// 00004321 -> 00430021 -> 04030201
+	let b = ((a & 0b0000000000000000000000000000000011111111111111110000000000000000) << 16) | (a & 0b0000000000000000000000000000000000000000000000001111111111111111);
+	let c = ((b & 0b0000000000000000111111110000000011111111000000001111111100000000) <<  8) | (b & 0b0000000000000000000000001111111100000000111111110000000011111111);
+	let d = ((c & 0b0000000011110000111100001111000011110000111100001111000011110000) <<  4) | (c & 0b0000000000001111000011110000111100001111000011110000111100001111);
+	let e = ((d & 0b0000110011001100110011001100110011001100110011001100110011001100) <<  2) | (d & 0b0000001100110011001100110011001100110011001100110011001100110011);
+	return e
+}
+
 pub struct State {
 	bitsize: usize,
 	state: Vec<u64>,
@@ -117,6 +133,7 @@ impl State {
 		self.state[0] = 1;
 	}
 
+	// output functions -> read from state
 	pub fn outand(&mut self) -> bool {
 		for v in self.state.iter() {
 			// if there is a zero inside this array, fail!
@@ -136,6 +153,46 @@ impl State {
 		}
 		return false
 	}
+
+	// rotate left/right (except for accumulator)
+	pub fn rol(&mut self) {
+		let mut state2: Vec::<u64> = Vec::with_capacity(self.state.capacity());
+		let halflen = self.state.len() / 2;
+		if halflen == 0 {
+			// extra sausage for 6 bit machines
+			state2.push(bit_spread_2(self.state[0]) | (bit_spread_2(self.state[0] >> 32) << 2));
+		} else {
+			for i in 0..halflen {
+				let val = self.state[i];
+				let val2 = self.state[i+halflen];
+				state2.push(bit_spread_2(val      ) | (bit_spread_2(val2      ) << 2));
+				state2.push(bit_spread_2(val >> 32) | (bit_spread_2(val2 >> 32) << 2));
+			}
+		}
+		self.state = state2
+	}
+	pub fn ror(&mut self) {
+		let mut state2: Vec::<u64> = Vec::with_capacity(self.state.capacity());
+		let halflen = self.state.len() / 2;
+		if halflen == 0 {
+			// extra sausage for 6 bit machines
+			state2.push(bit_compact_2(self.state[0]) | (bit_compact_2(self.state[0] >> 2) << 32));
+		} else {
+			for i in 0..self.state.len() {
+				if i < halflen {
+					let val = self.state[2*i];
+					let val2 = self.state[2*i+1];
+					state2.push(bit_compact_2(val) | (bit_compact_2(val2) << 32));
+				} else {
+					let val = self.state[2*(i-halflen)];
+					let val2 = self.state[2*(i-halflen)+1];
+					state2.push(bit_compact_2(val >> 2) | (bit_compact_2(val2 >> 2) << 32));
+				}
+			}
+		}
+		self.state = state2
+	}
+
 
 	// accumulator only functions
 	// 0: *v & 0b0101010101010101010101010101010101010101010101010101010101010101
@@ -248,8 +305,8 @@ fn main() {
 		println!(" or - accumulator := accumulator | head");
 		println!(" xor - accumulator := accumulator ^ head");
 		println!(" not - accumulator := ^accumulator");
-		println!(" lrot - rotate the stack to the left");
-		println!(" rrot - rotate the stack to the right");
+		println!(" rol - rotate the stack to the left");
+		println!(" ror - rotate the stack to the right");
 		println!(" outand - output 1 if all of the accumulators contains a 1");
 		println!(" outor - output 1 if any of the accumulators contains a 1");
 		println!(" quiet - turn on quiet mode");
@@ -280,6 +337,8 @@ fn main() {
 			"or" => state.or(),
 			"xor" => state.xor(),
 			"not" => state.not(),
+			"ror" => state.ror(),
+			"rol" => state.rol(),
 			"outand" => println!("{}", if state.outand() { "1" } else { "0" }),
 			"outor" => println!("{}", if state.outor() { "1" } else { "0" }),
 			"quiet" => args.quiet = true,
