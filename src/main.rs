@@ -286,6 +286,28 @@ impl State {
 				((*v & 0b1000100010001000100010001000100010001000100010001000100010001000) >> 1)
 		}
 	}
+
+	pub fn eq(&mut self) {
+		// 0001->0010, 0010->0001, 0100->0100, 1000->1000
+		for v in self.state.iter_mut() {
+			*v = 
+				((*v & 0b0001000100010001000100010001000100010001000100010001000100010001) << 1) |
+				((*v & 0b0010001000100010001000100010001000100010001000100010001000100010) >> 1) |
+				((*v & 0b0100010001000100010001000100010001000100010001000100010001000100)) |
+				((*v & 0b1000100010001000100010001000100010001000100010001000100010001000))
+		}
+	}
+
+	pub fn imp(&mut self) {
+		// 0001->0010, 0010->0010, 0100->0100, 1000->1000
+		for v in self.state.iter_mut() {
+			*v = 
+				((*v & 0b0001000100010001000100010001000100010001000100010001000100010001) << 1) |
+				((*v & 0b0010001000100010001000100010001000100010001000100010001000100010)) |
+				((*v & 0b0100010001000100010001000100010001000100010001000100010001000100)) |
+				((*v & 0b1000100010001000100010001000100010001000100010001000100010001000))
+		}
+	}
 }
 
 
@@ -305,6 +327,8 @@ fn main() {
 		println!(" and - accumulator := accumulator & head");
 		println!(" or - accumulator := accumulator | head");
 		println!(" xor - accumulator := accumulator ^ head");
+		println!(" eq - accumulator := accumulator <=> head");
+		println!(" imp - accumulator := accumulator => head (equals !accumulator | head)");
 		println!(" not - accumulator := ^accumulator");
 		println!(" rol - rotate the stack to the left");
 		println!(" ror - rotate the stack to the right");
@@ -337,6 +361,8 @@ fn main() {
 			"and" => state.and(),
 			"or" => state.or(),
 			"xor" => state.xor(),
+			"eq" => state.eq(),
+			"imp" => state.imp(),
 			"not" => state.not(),
 			"ror" => state.ror(),
 			"rol" => state.rol(),
