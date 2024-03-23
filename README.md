@@ -33,7 +33,7 @@ make && ./ndcpu -b 32
 Example: Propositional Logic SAT solving
 ---
 
-Let's examine if `(A => B) <=> (!B => !A)` is a tautology. We need only 3-4 bits, however the minimum number of bits is 6, so we run it with `./ndcpu -q -b 6` in quiet mode:
+Let's examine if `(A => B) <=> (!B => !A)` is a tautology. We need only 3-4 bits, however the minimum number of bits is 6, so we run it with `./ndcpu -q -b 6` in quiet mode (PRO tip: leave out `-q` if you want to see how the machine works):
 
 ```
 # write A onto stack
