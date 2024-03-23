@@ -7,12 +7,22 @@ It has a word size of 1 bit and a stack of at least 5 bits as well as one accumu
 
 This CPU can solve NP hard problems in P-TIME steps.
 
+[![ndcpu demo](https://img.youtube.com/vi/31zXnuZ_dFA/0.jpg)](https://www.youtube.com/watch?v=31zXnuZ_dFA)
+
 Quantum Computing with nondeterministic CPUs
 ---
 
 A nondeterministic CPU has the same properties as a quantum processor: it can solve NP hard problems in polynomial time.
 
 In this implementation, "polynomial time" is relative. The computation takes a polynomial amount of calculation steps. However we have to implement the ndcpu on a deterministic machine, so the current implementation on a deterministic machine involves exponentially many computation steps. With a few tweaks like bit vector arithmetic and a fixed limited machine size, we reach a decent amount of nondeterministic computation power.
+
+Compiling and running
+---
+
+At first, you have to install rust and do some dependency, magic, then you simply do the following to get a 32 bit nondeterministic CPU:
+```
+make && ./ndcpu -b 32
+```
 
 Example: Propositional Logic SAT solving
 ---
