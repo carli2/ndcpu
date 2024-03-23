@@ -14,12 +14,16 @@ Quantum Computing with nondeterministic CPUs
 
 A nondeterministic CPU has the same properties as a quantum processor: it can solve NP hard problems in polynomial time.
 
-In this implementation, "polynomial time" is relative. The computation takes a polynomial amount of calculation steps. However we have to implement the ndcpu on a deterministic machine, so the current implementation on a deterministic machine involves exponentially many computation cycles per calculation step. With a few tweaks like bit vector arithmetic and a fixed limited machine size, we reach a decent amount of nondeterministic computation power.
+The only difference between a "normal" CPU and this CPU is _one_ instruction that has _two_ follow-up states instead of one. The instruction `set x` will put a 0 _AND_ a 1 into the accumulator register simultaneously.
+You can imagine it like a "branch" instruction that tells the CPU to at this point split into two threads who both compute a different branch of an equation.
+This means, that a 32 bit nondeterministic machine can have up to 4 billion states simultaneously. In order to get a single readable output out of so many states, you can AND or OR over all states and get an aggregated result.
+
+In this implementation, "polynomial time" is relative. The computation takes a polynomial amount of calculation steps. However we have to implement the ndcpu on a deterministic machine, so the current implementation on a deterministic machine involves exponentially many computation cycles per calculation step. With a few tweaks like bit vector arithmetic and a fixed limited machine size, we reach a decent amount of nondeterministic computation power. But technically, each step is done at a constant time given that the machine size is constant, too.
 
 Compiling and running
 ---
 
-ndcpu is implemented in rust. Be sure to install `rustc` and `cargo` before compiling:
+ndcpu is implemented in rust. Make sure that you have `rustc` and `cargo` install before compiling:
 ```bash
 git clone https://github.com/carli2/ndcpu
 cd ndcpu
