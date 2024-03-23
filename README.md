@@ -20,7 +20,9 @@ Compiling and running
 ---
 
 At first, you have to install rust and do some dependency, magic, then you simply do the following to get a 32 bit nondeterministic CPU:
-```
+```bash
+git clone https://github.com/carli2/ndcpu
+cd ndcpu
 make && ./ndcpu -b 32
 ```
 
