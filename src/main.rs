@@ -227,6 +227,12 @@ impl State {
 		}
 	}
 
+	pub fn selectif(&mut self) {
+		for v in self.state.iter_mut() {
+			*v = *v & 0b1010101010101010101010101010101010101010101010101010101010101010;
+		}
+	}
+
 	// accumulator+head functions
 	// 00: *v & 0b0001000100010001000100010001000100010001000100010001000100010001
 	// 01: *v & 0b0010001000100010001000100010001000100010001000100010001000100010
@@ -334,6 +340,7 @@ fn main() {
 		println!(" ror - rotate the stack to the right");
 		println!(" outand - output 1 if all of the accumulators contains a 1");
 		println!(" outor - output 1 if any of the accumulators contains a 1");
+		println!(" if - only keep those states that have accumulator == 1 (quantum kill switch)");
 		println!(" quiet - turn on quiet mode");
 		println!(" !quiet - turn off quiet mode");
 		println!("");
@@ -368,6 +375,7 @@ fn main() {
 			"rol" => state.rol(),
 			"outand" => println!("{}", if state.outand() { "1" } else { "0" }),
 			"outor" => println!("{}", if state.outor() { "1" } else { "0" }),
+			"if" => state.selectif(),
 			"quiet" => args.quiet = true,
 			"!quiet" => args.quiet = false,
 			_ => println!("unknown command: {cmd}"),
