@@ -1,11 +1,11 @@
 Nondeterministic CPU
 ====================
 
-Here we present the first nondeterministic CPU.
+Here we present the first nondeterministic CPU. You can run it with any bitsize you want. A 32 bit nondeterministic CPU has the equivalent performance of a <b>4 billion core CPU</b>.
 
-It has a word size of 1 bit and a stack of at least 5 bits as well as one accumulator register. It does not have a instruction memory - all instructions are fed from the outside.
+It has a word size of 1 bit, one accumulator register and a stack of as much bits as you want. It does not have a instruction memory - all instructions are fed from the outside.
 
-This CPU can solve NP hard problems in P-TIME steps.
+This CPU can solve NP hard problems in P-TIME steps. It may be very efficient for brute forcing NP hard problems.
 
 [![ndcpu demo](https://img.youtube.com/vi/31zXnuZ_dFA/0.jpg)](https://www.youtube.com/watch?v=31zXnuZ_dFA)
 
@@ -14,12 +14,12 @@ Quantum Computing with nondeterministic CPUs
 
 A nondeterministic CPU has the same properties as a quantum processor: it can solve NP hard problems in polynomial time.
 
-In this implementation, "polynomial time" is relative. The computation takes a polynomial amount of calculation steps. However we have to implement the ndcpu on a deterministic machine, so the current implementation on a deterministic machine involves exponentially many computation steps. With a few tweaks like bit vector arithmetic and a fixed limited machine size, we reach a decent amount of nondeterministic computation power.
+In this implementation, "polynomial time" is relative. The computation takes a polynomial amount of calculation steps. However we have to implement the ndcpu on a deterministic machine, so the current implementation on a deterministic machine involves exponentially many computation cycles per calculation step. With a few tweaks like bit vector arithmetic and a fixed limited machine size, we reach a decent amount of nondeterministic computation power.
 
 Compiling and running
 ---
 
-At first, you have to install rust and do some dependency, magic, then you simply do the following to get a 32 bit nondeterministic CPU:
+ndcpu is implemented in rust. Be sure to install `rustc` and `cargo` before compiling:
 ```bash
 git clone https://github.com/carli2/ndcpu
 cd ndcpu
@@ -40,6 +40,8 @@ rol
 # write B onto stack
 set x
 write
+
+# from now the program works in 4 states simultanously
 
 # calculate A => B and put it onto stack
 ror
@@ -92,7 +94,7 @@ Nondeterministic silicon hardware
 ---
 
 This nondeterministic CPU can of course be implemented in hardware. The chip would have only 7 pins regardless of the amount of qbits that have been put into this hardware:
- - 4 pins to decode the instruction (there are 16 instructions in the moment)
+ - 4 pins to feed the instruction (there are 16 instructions in the moment)
  - 1 pin for clock: with a raising edge of the clock, the instruction is read and the new state is calculated
  - 1 pin for the result of `outand` (universal quantifier)
  - 1 pin for the result of `outor` (existence quantifier)
