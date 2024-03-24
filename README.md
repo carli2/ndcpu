@@ -18,12 +18,12 @@ The only difference between a "normal" CPU and this CPU is _one_ instruction tha
 You can imagine it like a "branch" instruction that tells the CPU to at this point split into two threads who both compute a different branch of an equation.
 This means, that a 32 bit nondeterministic machine can have up to 4 billion states simultaneously. In order to get a single readable output out of so many states, you can AND or OR over all states and get an aggregated result.
 
-In this implementation, "polynomial time" is relative. The computation takes a polynomial amount of calculation steps. However we have to implement the ndcpu on a deterministic machine, so the current implementation on a deterministic machine involves exponentially many computation cycles per calculation step. With a few tweaks like bit vector arithmetic and a fixed limited machine size, we reach a decent amount of nondeterministic computation power. But technically, each step is done at a constant time given that the machine size is constant, too.
+In this implementation, "polynomial time" is relative. The computation takes a polynomial amount of calculation steps. However we have to implement the ndcpu on a deterministic machine, so the current implementation on a deterministic machine involves exponentially many computation cycles per calculation step depending on the number of bits. With a few tweaks like bit vector arithmetic and a fixed limited machine size, we reach a decent amount of nondeterministic computation power. So when you keep the bitsize constant (let's say 32 bits), each calculation is technically done in constant time.
 
 Compiling and running
 ---
 
-ndcpu is implemented in rust. Make sure that you have `rustc` and `cargo` install before compiling:
+ndcpu is implemented in rust. Make sure that you have `rustc` and `cargo` installed before compiling:
 ```bash
 git clone https://github.com/carli2/ndcpu
 cd ndcpu
@@ -33,15 +33,15 @@ make && ./ndcpu -b 32
 Example: Propositional Logic SAT solving
 ---
 
-Let's examine if `(A => B) <=> (!B => !A)` is a tautology. We need only 3-4 bits, however the minimum number of bits is 6, so we run it with `./ndcpu -q -b 6` in quiet mode (PRO tip: leave out `-q` if you want to see how the machine works):
+Let's examine if `(A => B) <=> (!B => !A)` is a tautology. We need only 3-4 bits, however the minimum number of bits is 6, so we run it with `./ndcpu -b 6`. PRO tip: When the problem gets bigger or you want to integrate `ndcpu` into a toolchain, use `ndcpu -q` to get a quiet machine that only prints when `outand` and `outor` are called.
 
 ```
 # write A onto stack
 set x
 write
-rol
 
 # write B onto stack
+rol
 set x
 write
 
@@ -89,10 +89,18 @@ The result is `1`, so the formula is a tautology.
 
 Implementation Details
 ---
-A single state of a nondeterministic CPU can be just encoded as an array of bits to represent the state. To encode all states, we initialize a bitvector and use the state as the address to a bit.
+A single state of a nondeterministic CPU can be encoded as an array of bits to represent the contents of the stack as well as the accumulator.
+To encode all states, we initialize a bitvector and use the state as the address to a bit.
 On initialization, we set the bitvector to zero except for the 000000-state (which is the least significant bit in our bitvector) which will be turned `1`.
 
-Whenever there is a operation on the state vector, it can be implemented as a set of bit manipulation tricks that I won't explain further but you can check it out in `src/`.
+Whenever there is a operation on the state vector, it can be implemented as a set of bit manipulation tricks.
+There are four kinds of operations on the machine:
+- Unary operations (set 0, set 1, set x, not, if) will only operate on the accumulator register
+- Binary operations (read, write, and, or, xor, eq, imp) will operate on the accumulator register as well as the head of the stack
+- Shift operations (rol, ror) are the most expensive ones because they must copy the memory in order to shuffle around all the data
+- Output operations (outand, outor) will aggregate a value over all states and print it to stdout
+
+If you are interested in how it works in detail, check out `src/`.
 
 Nondeterministic silicon hardware
 ---
