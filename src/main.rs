@@ -374,7 +374,7 @@ fn main() {
 	let stdin = io::stdin();
 	for cmd_result in stdin.lock().lines() {
 		let cmd = cmd_result.unwrap();
-		match cmd.as_str() {
+		match cmd.as_str().trim() {
 			"reset" => state.reset(),
 			"set 0" => state.set0(),
 			"set 1" => state.set1(),
